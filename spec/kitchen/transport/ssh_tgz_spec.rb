@@ -16,40 +16,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative "../../spec_helper"
+require_relative '../../spec_helper'
 
-require "kitchen/transport/ssh_tgz"
+require 'kitchen/transport/ssh_tgz'
 
 describe Kitchen::Transport::SshTgz do
-
   #
   # Create temporary files, of a given size/content. Used as test
   # files for tar-gzipping.
   #
   def make_temp_file(content, size)
-    file = Tempfile.new("file")
+    file = Tempfile.new('file')
     file.write(content * size)
     file.close
     file.path
   end
 
-  let(:file_A)          { make_temp_file("A", 100) }
-  let(:file_B)          { make_temp_file("B", 200) }
-  let(:file_C)          { make_temp_file("C", 300) }
+  let(:file_A)          { make_temp_file('A', 100) }
+  let(:file_B)          { make_temp_file('B', 200) }
+  let(:file_C)          { make_temp_file('C', 300) }
 
   #
   # Create a mock SCP session, so we capture the arguments and return values that would be passed to
   # the upload! method.
   #
-  let(:mock_session)    { mock("session") }
-  let(:mock_scp)        { mock("scp") }
+  let(:mock_session)    { mock('session') }
+  let(:mock_scp)        { mock('scp') }
 
   before do
     Kitchen::Transport::SshTgz::Connection.any_instance.stubs(:session).returns(mock_session)
     mock_session.stubs(:scp).returns(mock_scp)
   end
 
-  it "does not upload anything, if no files are provided" do
+  it 'does not upload anything, if no files are provided' do
     #
     # No uploading or exec'ing should take place.
     #
@@ -60,10 +59,10 @@ describe Kitchen::Transport::SshTgz do
     # Run the test...
     #
     connection = Kitchen::Transport::SshTgz::Connection.new
-    connection.upload([], "/tmp/remote")
+    connection.upload([], '/tmp/remote')
   end
 
-  it "compresses multiple files into a single upload" do
+  it 'compresses multiple files into a single upload' do
     #
     # the tgz file must first be uploaded. Exactly one upload will occur.
     #
@@ -71,18 +70,18 @@ describe Kitchen::Transport::SshTgz do
       # compressed file sizes can vary slightly, since tar files contain date stamps,
       # which compress unpredictably.
       size = Kitchen::Tgz.original_size(source_file)
-      dest_file == "/tmp/remote/kitchen.tgz" && size == 4096
+      dest_file == '/tmp/remote/kitchen.tgz' && size == 4096
     end
 
     #
     # then, the tgz file must be extracted on the remote host.
     #
-    mock_session.expects(:exec!).once.with("tar -C /tmp/remote -xmzf /tmp/remote/kitchen.tgz")
+    mock_session.expects(:exec!).once.with('tar -C /tmp/remote -xmzf /tmp/remote/kitchen.tgz')
 
     #
     # Run the test...
     #
     connection = Kitchen::Transport::SshTgz::Connection.new
-    connection.upload([file_A, file_B, file_C], "/tmp/remote")
+    connection.upload([file_A, file_B, file_C], '/tmp/remote')
   end
 end

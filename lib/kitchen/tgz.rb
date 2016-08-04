@@ -16,16 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "tempfile"
-require "zlib"
-require "rubygems/package"
+require 'tempfile'
+require 'zlib'
+require 'rubygems/package'
 
 module Kitchen
   #
   # Error thrown if the Tgz has an invalid format.
   #
   class GzipFormatError < StandardError; end
-
   #
   # Represents a Tar-Gzip file, allowing multiple files to be combined
   # into a single file. This is useful for transmitting a large number
@@ -47,11 +46,11 @@ module Kitchen
     def initialize(tgz_file_name = nil)
       if tgz_file_name
         # user-provided output file name
-        @tgz_file = File.open(tgz_file_name, "wb+")
+        @tgz_file = File.open(tgz_file_name, 'wb+')
         @path = tgz_file_name
       else
         # auto-generated output file name
-        @tgz_file = Tempfile.new("tgz")
+        @tgz_file = Tempfile.new('tgz')
         @tgz_file.binmode
         @path = @tgz_file.path
       end
@@ -60,7 +59,7 @@ module Kitchen
       # Intermediate file for writing the 'tar' content (which will then be
       # gzipped into the output 'tgz' file)
       #
-      @tar_file = Tempfile.new("tar")
+      @tar_file = Tempfile.new('tar')
       @tar_file.binmode
       @tar_writer = Gem::Package::TarWriter.new(@tar_file)
     end
@@ -115,9 +114,9 @@ module Kitchen
       # @raise [GzipFormatError] if the file is not a valid Gzip file.
       #
       def original_size(file_name)
-        File.open(file_name, "r") do |file|
+        File.open(file_name, 'r') do |file|
           # the first three bytes of a gzip file must be 0x1f, 0x8b, 0x08
-          fail unless (file.readbyte == 0x1f) && (file.readbyte == 0x8b) &&
+          raise "Invalid gzip file: #{file_name}" unless (file.readbyte == 0x1f) && (file.readbyte == 0x8b) &&
               (file.readbyte == 0x08)
           return original_file_length_field(file)
         end
@@ -133,7 +132,7 @@ module Kitchen
       #
       def original_file_length_field(file)
         file.seek(-4, IO::SEEK_END)
-        (file.readbyte) | (file.readbyte << 8) | (file.readbyte << 16) | (file.readbyte << 24)
+        file.readbyte | (file.readbyte << 8) | (file.readbyte << 16) | (file.readbyte << 24)
       end
     end
 
@@ -144,8 +143,8 @@ module Kitchen
     #
     def add_directory_to_tar(dir, file_name, full_path)
       entries = Dir.entries(full_path)
-      entries.delete(".")
-      entries.delete("..")
+      entries.delete('.')
+      entries.delete('..')
       add_files(dir, entries.map { |entry| "#{file_name}/#{entry}" })
     end
 
@@ -155,7 +154,7 @@ module Kitchen
     def add_file_to_tar(full_path, file_name)
       stat = File.stat(full_path)
       @tar_writer.add_file(file_name, stat.mode) do |file|
-        File.open(full_path, "rb") do |input|
+        File.open(full_path, 'rb') do |input|
           while (buff = input.read(4096))
             file.write(buff)
           end

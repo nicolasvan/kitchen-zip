@@ -16,13 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "kitchen"
-require "kitchen/tgz"
-require "kitchen/transport/ssh"
+require 'kitchen'
+require 'kitchen/tgz'
+require 'kitchen/transport/ssh'
 
-require "net/ssh"
-require "net/scp"
-require "pathname"
+require 'net/ssh'
+require 'net/scp'
+require 'pathname'
 
 module Kitchen
   module Transport
@@ -36,14 +36,12 @@ module Kitchen
     # @author Peter Smith <peter@petersmith.net>
     #
     class SshTgz < Kitchen::Transport::Ssh
-
       #
       # Manage a connection for the SshTgz transport mechanism. This is essentially
       # the same as for the Ssh::Connection class, except we compress before
       # uploading.
       #
       class Connection < Kitchen::Transport::Ssh::Connection
-
         # (see Ssh::Connection#upload)
         def upload(locals, remote)
           # attempt tar-gzip upload, to improve performance.
@@ -51,7 +49,7 @@ module Kitchen
 
           # if tgz upload fails (e.g. not supported on target platform), fall back to
           # file-by-file upload.
-          logger.warn("Tgz upload failed. Resorting to file-by-file upload.")
+          logger.warn('Tgz upload failed. Resorting to file-by-file upload.')
           super
         end
 
@@ -100,10 +98,10 @@ module Kitchen
         # @return [Kitchen::Tgz] the Tgz object, representing the tar-gzip file we created.
         #
         def create_tgz_file(locals)
-          logger.debug("Creating archive to upload")
+          logger.debug('Creating archive to upload')
           tgz = Kitchen::Tgz.new
           locals.each do |local|
-            logger.debug("Adding #{local} to archive") 
+            logger.debug("Adding #{local} to archive")
             pathname = Pathname.new(local)
             tgz.add_files(pathname.dirname.to_s, [pathname.basename.to_s])
           end

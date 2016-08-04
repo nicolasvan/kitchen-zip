@@ -16,11 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative "../spec_helper"
+require_relative '../spec_helper'
 
-require "tempfile"
-require "fileutils"
-require "kitchen/tgz"
+require 'tempfile'
+require 'fileutils'
+require 'kitchen/tgz'
 
 describe Kitchen::Tgz do
   #
@@ -32,7 +32,7 @@ describe Kitchen::Tgz do
   def create_file(path, size)
     dir_name = File.dirname(path)
     FileUtils.mkdir_p(dir_name)
-    File.open(path, "wb") do |file|
+    File.open(path, 'wb') do |file|
       (0...size).each do |i|
         file.print((i % 256).chr)
       end
@@ -44,7 +44,7 @@ describe Kitchen::Tgz do
   # be tar-gzipped in our test cases.
   #
   def create_temp_files(files_hash)
-    dir = Dir.mktmpdir("test")
+    dir = Dir.mktmpdir('test')
     files_hash.each_pair { |name, size| create_file("#{dir}/#{name}", size) }
     dir
   end
@@ -59,9 +59,9 @@ describe Kitchen::Tgz do
   #
   # Test cases
   #
-  it "can be created with a user-specified output file name" do
+  it 'can be created with a user-specified output file name' do
     # create a temporary file, to use as the output file we'll provide to TGZ
-    user_chosen_output_file = Tempfile.new("test")
+    user_chosen_output_file = Tempfile.new('test')
     user_chosen_output_file_name = user_chosen_output_file.path
 
     # create a new Tgz object, with our user-specified output file name.
@@ -77,7 +77,7 @@ describe Kitchen::Tgz do
     user_chosen_output_file.close
   end
 
-  it "can be created with an auto-generated output file name" do
+  it 'can be created with an auto-generated output file name' do
     # create a new Tgz object, with an auto-generated output file name.
     test_tgz = Kitchen::Tgz.new
     @tgz_output_path = test_tgz.path
@@ -87,63 +87,63 @@ describe Kitchen::Tgz do
     File.exist?(test_tgz.path).must_equal true
   end
 
-  it "rejects output file names that are not writable" do
+  it 'rejects output file names that are not writable' do
     proc do
-      Kitchen::Tgz.new("/invalid/missing/path")
+      Kitchen::Tgz.new('/invalid/missing/path')
     end.must_raise Errno::ENOENT
   end
 
-  it "allows files to be archived within a single directory" do
+  it 'allows files to be archived within a single directory' do
     test_tgz = Kitchen::Tgz.new
     @tgz_output_path = test_tgz.path
 
     # create a number of test files (of varying lengths) into a temporary
     # directory, add them to the archive, then flush the file to disk.
     @temp_directory = create_temp_files(
-      "file_A" => 100,
-      "file_B" => 200,
-      "file_C" => 300
+      'file_A' => 100,
+      'file_B' => 200,
+      'file_C' => 300
     )
-    test_tgz.add_files(@temp_directory, %w[file_A file_B file_C])
+    test_tgz.add_files(@temp_directory, %w(file_A file_B file_C))
     test_tgz.close
 
     Kitchen::Tgz.original_size(@tgz_output_path).must_equal 4096
   end
 
-  it "allows files to be archived in a directory hierarchy" do
+  it 'allows files to be archived in a directory hierarchy' do
     test_tgz = Kitchen::Tgz.new
     @tgz_output_path = test_tgz.path
 
     # create test files within subdirectories
     @temp_directory = create_temp_files(
-      "dirA/dirB/file_A" => 1000,
-      "dirA/dirB/file_B" => 2000,
-      "dirA/file_C" => 3000
+      'dirA/dirB/file_A' => 1000,
+      'dirA/dirB/file_B' => 2000,
+      'dirA/file_C' => 3000
     )
-    test_tgz.add_files(@temp_directory, ["dirA"])
+    test_tgz.add_files(@temp_directory, ['dirA'])
     test_tgz.close
 
     Kitchen::Tgz.original_size(@tgz_output_path).must_equal 8704
   end
 
-  it "allows large files to added" do
+  it 'allows large files to added' do
     test_tgz = Kitchen::Tgz.new
     @tgz_output_path = test_tgz.path
 
     @temp_directory = create_temp_files(
-      "dirA/dirB/file_A" => 1_000_000
+      'dirA/dirB/file_A' => 1_000_000
     )
-    test_tgz.add_files(@temp_directory, ["dirA"])
+    test_tgz.add_files(@temp_directory, ['dirA'])
     test_tgz.close
 
     Kitchen::Tgz.original_size(@tgz_output_path).must_equal 1001984
   end
 
-  it "reject member file names that do not exist" do
+  it 'reject member file names that do not exist' do
     test_tgz = Kitchen::Tgz.new
     @tgz_output_path = test_tgz.path
     proc do
-      test_tgz.add_files("/", ["non-existed-file"])
+      test_tgz.add_files('/', ['non-existed-file'])
     end.must_raise Errno::ENOENT
     test_tgz.close
   end
