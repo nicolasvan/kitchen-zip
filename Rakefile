@@ -1,12 +1,14 @@
 # encoding: UTF-8
 
 require 'rubocop/rake_task'
-require 'rspec/core/rake_task'
+require 'rake/testtask'
 
-task default: [:rubocop, :spec]
+task default: [:rubocop, :unit]
 
 RuboCop::RakeTask.new
 
-RSpec::Core::RakeTask.new(:spec) do |t|
-  t.pattern = FileList['spec/**/*_spec.rb']
+Rake::TestTask.new(:unit) do |t|
+  t.libs.push 'lib'
+  t.test_files = FileList['spec/**/*_spec.rb']
+  t.verbose = true
 end
