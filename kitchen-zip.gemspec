@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.platform      = Gem::Platform::RUBY
   s.require_paths = ['lib']
   s.rubyforge_project = '[none]'
-  s.add_dependency 'test-kitchen', '~> 1.4'
+  s.add_dependency 'test-kitchen', '>= 1.4'
   s.add_dependency 'net-ssh', '>= 2.9'
   s.add_development_dependency 'minitest',  '~> 5.3'
   s.add_development_dependency 'mocha',     '~> 1.1'
